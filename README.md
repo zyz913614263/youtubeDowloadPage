@@ -8,10 +8,9 @@
 ```bash
 chmod +x goweb
 sudo ./goweb > log 2>&1 &
-
+```
 
 ## 依赖项
-
 - MySQL数据库
 - Docker（可选，用于快速安装MySQL）
 
@@ -21,9 +20,11 @@ sudo ./goweb > log 2>&1 &
 
 ```bash
 docker run -itd --name mysql-test -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql
+```
 
 ## Linux版本编译
+
 ```bash
 GOOS=linux go build -o goweb
-
+```
 ## 致谢
