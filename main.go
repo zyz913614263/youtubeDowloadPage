@@ -314,8 +314,8 @@ func handleIndex(c *gin.Context) {
 	username := getUserName(c)
 	if username == "" {
 		// 如果用户名为空，则将其设置为空字符串
-		c.Redirect(http.StatusSeeOther, "/login")
-		return
+		//c.Redirect(http.StatusSeeOther, "/login")
+		//return
 	}
 
 	videoURL := r.FormValue("url")
