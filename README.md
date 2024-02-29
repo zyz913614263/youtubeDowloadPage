@@ -7,14 +7,11 @@
 ## 依赖项
   - MySQL数据库
   - Docker（可选，用于快速安装MySQL）
-  
-          #### 使用Docker安装MySQL
+          使用Docker安装MySQL
           
           如果你安装了Docker，你可以使用以下命令来快速安装MySQL：
-          
-          ```bash
           docker run -itd --name mysql-test -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql
-          ```
+          
 
 ## 网站启动方式
   配置文件 config.yaml 包含了与数据库相关的配置信息，可自行修改。
