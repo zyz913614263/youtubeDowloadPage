@@ -5,9 +5,14 @@
 该项目使用Go语言和原生HTML进行开发。
 
 ## 网站启动方式
+
 ```bash
-chmod +x goweb
+# 将整个文件夹拷贝到linux服务器上
+cd youtubeDowloadPage
+chmod +x goweb 
 sudo ./goweb > log 2>&1 &
+
+
 ```
 
 ## 依赖项
