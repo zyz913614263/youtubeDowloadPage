@@ -1,28 +1,29 @@
-# youtubeDowloadPage
+# YouTube视频下载网站
 
-免费 youtube，油管视频下载网站
+[FreeVideos.cn](https://www.freevideos.cn/) 是一个免费的YouTube视频下载网站。
 
-https://www.freevideos.cn/
+该项目使用Go语言和原生HTML进行开发。
 
-
-
-开发使用go语言和原生的html
-
-依赖数据库mysql
-如果你安装了docker可以使用docker安装
-docker run -itd --name mysql-test -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql
-
-
-linux版本编译方式
-
-GOOS=linux go build -o goweb
-
-linux 运行方式
-cd goweb
+## 网站启动方式
+```bash
 chmod +x goweb
 sudo ./goweb > log 2>&1 &
 
-日志在log文件中
 
+## 依赖项
 
-#本程序90%代码有chatgpt 提供
+- MySQL数据库
+- Docker（可选，用于快速安装MySQL）
+
+### 使用Docker安装MySQL
+
+如果你安装了Docker，你可以使用以下命令来快速安装MySQL：
+
+```bash
+docker run -itd --name mysql-test -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql
+
+## Linux版本编译
+```bash
+GOOS=linux go build -o goweb
+
+## 致谢
