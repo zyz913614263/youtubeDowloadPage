@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册页面</title>
+    <style>
+        /* 表单样式 */
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/style.css?v=1">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">主页</a>
+        <a href="/about">关于</a>
+        <a href="/contact">联系我们</a>
+        {{ if .UserName }}
+        <a href="/profile">{{ .UserName }}</a>
+        <a href="/logout">登出</a>
+        {{ else }}
+        <a href="/login">登录</a>
+        <a href="/register">注册</a>
+        {{ end }}
+
+    </div>
+<form action="/register" method="post">
+    <h2>注册</h2>
+    <input type="text" id="username" name="username" placeholder="用户名" required>
+    <input type="password" id="password" name="password" placeholder="密码" required>
+    <input type="email" id="email" name="email" placeholder="电子邮件" required>
+    <button type="submit">注册</button>
+</form>
+</body>
+</html>

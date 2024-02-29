@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <style>
+        /* CSS 样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+        .user-info {
+            margin-bottom: 20px;
+        }
+        .user-info label {
+            font-weight: bold;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/style.css?v=1">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">主页</a>
+        <a href="/about">关于</a>
+        <a href="/contact">联系我们</a>
+        {{ if .userProfile.UserName}}
+        <a href="/profile">{{ .userProfile.UserName }}</a>
+        <a href="/logout">登出</a>
+        {{ else }}
+        <a href="/login">登录</a>
+        <a href="/register">注册</a>
+        {{ end }}
+
+    </div>
+    <div class="container">
+        <h1>User Profile</h1>
+        <div class="user-info">
+            <label>UserName:</label> {{ .userProfile.UserName }}<br>
+            <label>Email:</label> {{ .userProfile.Email }}<br>
+            <!-- 其他用户信息字段 -->
+        </div>
+        <!-- 其他内容 -->
+    </div>
+</body>
+</html>

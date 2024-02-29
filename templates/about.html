@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于我们</title>
+    <style>
+        /* CSS 样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+        .about-content {
+            margin-bottom: 20px;
+        }
+        .about-content p {
+            margin: 10px 0;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/style.css?v=1">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">主页</a>
+        <a href="/about">关于</a>
+        <a href="/contact">联系我们</a>
+        {{ if .UserName }}
+        <a href="/profile">{{ .UserName }}</a>
+        <a href="/logout">登出</a>
+        {{ else }}
+        <a href="/login">登录</a>
+        <a href="/register">注册</a>
+        {{ end }}
+
+    </div>
+    <div class="container">
+        <h1>关于我们</h1>
+        <div class="about-content">
+            <p>欢迎访问我们的网站！</p>
+            <p>我们是一支致力于为客户提供高质量服务的团队。</p>
+            <p>如果您有任何问题或咨询，请随时与我们联系。</p>
+            <p class="description"> 本网站是一个个人兴趣爱好为基础的网站，基于互联网上的一些开源项目建设，比如Bootstrap、Jquery、Youtube-dl等。</p>
+            <p class="description"> 本站旨在为用户提供视频地址在线解析服务，用于用户备份及收藏个人喜爱的视频等。</p>
+            <p class="description"> 本站不储存、发布相关视频，视频版权归属其合法持有人所有，本站不对使用者的行为负担任何法律责任。</p>
+            <p class="description"> 如果有因为本站而导致您的权益受到损害，请与我们联系，我们将理性对待，协助你解决相关问题。</p>
+        </div>
+    </div>
+    <div class="donation">
+        <img src="/static/donate.jpg" alt="赞赏图片">
+        <img src="/static/donate2.jpg" alt="赞赏图片">
+        <div class="donation-text">如果觉得对你有帮助，那就赞赏我一下吧</div>
+    </div>
+</body>
+</html>
