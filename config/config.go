@@ -24,7 +24,10 @@ type Config struct {
 	OnlineKEY   string
 	LocalCSR    string
 	LocalKey    string
-	NouseMysql  bool
+	NouseMysql  bool //测试使用，不加载mysql
+	RedisAddr   string
+	RedisPass   string
+	RedisDB     int
 }
 
 var DefaultConfig = &Config{}
@@ -41,21 +44,10 @@ func InitConfig(cconfigFile string) {
 		log.Fatalf("Error reading config file: %v", err)
 	}
 
-	// 从配置文件中读取 MySQL 相关字段
-	DefaultConfig.MysqlUsername = viper.GetString("mysql.username")
-	DefaultConfig.MysqlPassword = viper.GetString("mysql.password")
-	DefaultConfig.MysqlHost = viper.GetString("mysql.host")
-	DefaultConfig.MysqlPort = viper.GetInt("mysql.port")
-	DefaultConfig.MysqlDBName = viper.GetString("mysql.dbname")
-	DefaultConfig.IsProxy = viper.GetBool("isproxy")
-	DefaultConfig.Proxy = viper.GetString("proxy")
-	DefaultConfig.CookiesFile = viper.GetString("cookie")
-	DefaultConfig.Online = viper.GetBool("online")
-	DefaultConfig.OnlineCSR = viper.GetString("OnlineCSR")
-	DefaultConfig.OnlineKEY = viper.GetString("OnlineKEY")
-	DefaultConfig.LocalCSR = viper.GetString("LocalCSR")
-	DefaultConfig.LocalKey = viper.GetString("LocalKey")
-	DefaultConfig.NouseMysql = viper.GetBool("NouseMysql")
+	// 将配置文件解析到结构体中
+	if err := viper.Unmarshal(&DefaultConfig); err != nil {
+		log.Fatalf("Error unmarshaling config file: %v", err)
+	}
 
 	log.Printf("config load %v", DefaultConfig)
 }

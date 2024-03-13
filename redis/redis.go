@@ -8,16 +8,17 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"zyz.com/m/config"
 )
 
 var Client *redis.Client
 
-func init() {
-	redisAddr := "localhost:6379" // Redis服务器地址
+func InitRedis() {
+
 	Client = redis.NewClient(&redis.Options{
-		Addr:     redisAddr,
-		Password: "", // 密码，如果有的话
-		DB:       0,  // 使用默认的数据库
+		Addr:     config.DefaultConfig.RedisAddr,
+		Password: config.DefaultConfig.RedisPass, // 密码，如果有的话
+		DB:       config.DefaultConfig.RedisDB,   // 使用默认的数据库
 	})
 
 	// 检查Redis连接是否正常
