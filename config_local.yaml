@@ -1,0 +1,17 @@
+# config.yaml
+mysql:
+  username: root
+  password: 123456
+  host: 127.0.0.1
+  port: 3306
+  dbname: web
+  
+isproxy: true
+proxy: http://127.0.0.1:33210
+cookie: cookies.txt
+online: false
+OnlineCSR: online/freevideos.cn_bundle.crt
+OnlineKEY: online/freevideos.cn.key
+LocalCSR: cert.pem
+LocalKey: private-key.pem
+NoUseMysql: false

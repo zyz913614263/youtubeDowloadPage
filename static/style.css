@@ -196,3 +196,79 @@ body {
     margin-top: 20px;
     color: #666;
 }
+
+* {
+    font-family: 'Microsoft JhengHei';
+}
+
+.center { text-align: center; }
+
+html, body {
+    height: 50%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+
+div {
+    padding: 0px;
+    margin: 0px;
+}
+
+*.title {
+    font-size: 20pt;
+    padding: 20px 20px;
+    background-color: pink;
+    font-weight: bold;
+}
+
+div#divFooter {
+    text-align: center;
+    background-color: #63b175;
+    padding: 20px 0px;
+}
+
+a.white {
+    color: white;
+    text-decoration: underline dotted;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    color: white;
+}
+
+input.search {
+    width: 60%;
+    height: 30px;
+    border: none;
+    outline: none;
+    border-bottom: 2px solid red;
+    font-size: 14px;
+}
+
+input.td {
+    width: 60%;
+    font-size: 14px;
+}
+
+div.button {
+    padding: 20px 0px;
+}
+
+*.button {
+    color: #000000;
+    background: #00bf00;
+    padding: 9px 10px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 6px;
+}
+
+.flex {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}

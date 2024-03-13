@@ -1,14 +1,251 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
+<link rel="stylesheet" type="text/css" href="/static/style.css?v=1">
+<meta charset="utf-8"/>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>免费视频解析下载网站</title>
-    <link rel="stylesheet" type="text/css" href="/static/style.css?v=1">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5208021678137142"
-     crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script>
+     <!-- Google tag (gtag.js) -->
+     <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NHCDVVLFE"></script>
+     <script>
+         window.dataLayer = window.dataLayer || [];
+         function gtag(){dataLayer.push(arguments);}
+         gtag('js', new Date());
+ 
+         gtag('config', 'G-6NHCDVVLFE');
+     </script>
 </head>
+<style>
+    #divURL { padding-top: 20px; }
+    #divResult { padding-top: 20px; }
+
+    table {
+        margin: auto;
+        border: none;
+    }
+
+    table tr {
+        width: 99%;
+        padding: 0;
+        margin: 0;
+    }
+
+    table th {
+        background-color: #ccc;
+        width: 200px;
+        padding: 0;
+        margin: 0;
+    }
+
+    table td {
+        background-color: aquamarine;
+        padding: 0;
+        margin: 0;
+    }
+
+    .github {
+        position: absolute;
+        right: 0;
+        top: 0;
+        padding: 20px 20px;
+        color: green
+    }
+
+    .flex {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .available {
+        color: mediumseagreen;
+        margin: 20px 0;
+        font-size: 120%;
+    }
+
+    .btn-google-sub {
+        display: inline-block;
+        cursor: pointer;
+        user-select: none;
+        padding: 10px 20px;
+        background: mediumorchid;
+        color: white;
+    }
+
+    .btn-google-sub:active {
+        color: white;
+        background: black;
+    }
+
+    #wait_subtitle {
+        display: none;
+    }
+
+    #thumbnail {
+        max-width: 30%;
+    }
+</style>
+
+<!-- <script src="js/loadbar.js"></script> -->
+<!-- <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script> -->
+<script src="/static/js/jquery.js"></script>
+<script src="/static/js/libjrt.js"></script>
+
+<script>
+
+
+    /** 代理封面图片 */
+    function getProxyImg(src) {
+        if (src.startsWith('https://i.ytimg.com/') || src.match(/^https?:\/\/i\d\.hdslb\.com\//)) {
+            return '/pxy?url=' + src;
+        }
+        return src;
+    }
+
+    // AJAX完成, 填充表单
+    function fill(res) {
+        $("#title").text(res.title || '解析结果');
+        $("img#thumbnail")[0].src = getProxyImg(res.thumbnail);
+        $("#divResult td").remove()
+        var tr = $("#divResult tr")
+
+        tr.each(function () {
+            if (this.innerText.trim() === "")
+                this.remove()
+        })
+
+        for (var i = 0; i < res.available.audios.length; i ++ ) {
+            var r = res.available.audios[i]
+            row = $(`<tr>
+                <td><input class="td" id="audio${ r.id }" value="${ r.id }" name="selectedAudio" type="radio" style="height: 20px"></td>
+		    <td><a href="${r.format}" target="_blank">${ r.id }</a></td>
+                <td>${ r.rate }</td>
+                <td>${ r.size }</td>
+                <td>${ r.info }</td>
+            </tr>`)
+            row.appendTo("table#audios")
+            if (r.id === res.best.audio.id) {
+                $(`#audio${ r.id }`).click()
+            }
+        }
+
+        for (var i = 0; i < res.available.videos.length; i ++ ) {
+            var r = res.available.videos[i]
+            row = $(`<tr>
+                <td><input class="td" id="video${ r.id }" value="${ r.id }" name="selectedVideo" type="radio" style="height: 20px"></td>
+		    <td><a href="${r.format}" target="_blank" >${ r.id }</a></td>
+                <td>${ r.scale }</td>
+                <td>${ r.rate }</td>
+                <td>${ r.size }</td>
+                <td>${ r.info }</td>
+            </tr>`)
+            row.appendTo("table#videos")
+            if (r.id === res.best.video.id) {
+                $(`#video${ r.id }`).click()
+            }
+        }
+        $("#divResult").fadeIn()
+    }
+
+    let allowSearchParams = ['v', 'p'];
+    parse = fun => {
+        if (window.blacked === 1) {
+            Develon.notify('由于服务器请求次数过多<br >服务器IP已被Youtube拉黑<br ><br >请等待解封<br>你还可以自行部署或使用B站');
+        }
+        $("#divResult").fadeOut()
+        var url = $('input#url')[0].value
+
+        // if (url.match(/^https?:\/\/(www\.|m\.)?bilibili\.com\/video\/([\w\d]){11,14}$/)) { // 匹配B站视频
+            // window.document.location.href = `./bilibili.html?url=${encodeURIComponent(url)}`;
+            // window.document.location.href = `./bilibili.html?url=${url}`;
+            // return;
+        // }
+        let inputURL = new URL(url);
+        let params = allowSearchParams.filter(it => !!inputURL.searchParams.get(it)).map(it => it + '=' + inputURL.searchParams.get(it));
+        inputURL.search = `?${params.join('&')}`;
+        url = inputURL.toString();
+        $('input#url')[0].value = url;
+
+        var id = Develon.notifyID // 获取即将弹出的通知框ID
+        var parseRequest = $.ajax({
+            url: "/y2b/parse?" + encodeURIComponent(url.replace('youtube', 'y2b').replace('youtu', 'y2')),
+            success: fun => {
+                if (fun.success === false) {
+                    Develon.notify(fun.error)
+                    Develon.removeNotify(id)
+                    return
+                }
+                // Develon.notify("解析完成")
+                Develon.removeNotify(id)
+                //console.log(fun.result);
+                fill(fun.result)
+            },
+            error(event) {
+                
+            }
+        })
+        Develon.notifyWait("正在解析, 请稍等", fun => {
+            title();
+            parseRequest.abort()
+            return true
+        })
+    }
+
+    $(fun => {
+        $("input#url")[0].focus()
+    })
+
+    $(document).ready(function() {
+    // 获取历史记录
+    var history = JSON.parse(localStorage.getItem('history')) || [];
+
+    // 显示历史记录
+    function showHistory() {
+        $('#history').empty();
+        if (history.length > 0) {
+            var list = $('<ul>');
+            history.forEach(function(url) {
+                var item = $('<li class="history-item">').text(url); // 添加类名以便使用事件委托
+                list.append(item);
+            });
+            $('#history').append(list).show();
+        }
+    }
+
+    // 存储新的历史记录
+    function saveHistory(url) {
+        var index = history.indexOf(url);
+        if (index !== -1) {
+            history.splice(index, 1);
+        }
+        history.unshift(url);
+        if (history.length > 5) {
+            history.pop();
+        }
+        localStorage.setItem('history', JSON.stringify(history));
+    }
+
+    // 初始化时显示历史记录
+    showHistory();
+
+    // 监听历史记录的点击事件（使用事件委托）
+    $(document).on('click', '.history-item', function() {
+        var historyValue = $(this).text();
+        $('#url').val(historyValue); // 将历史记录的值填充到输入框中
+    });
+
+    // 监听输入框输入事件
+    $('#url').keyup(function() {
+        var url = $(this).val().trim();
+        saveHistory(url);
+    });
+});
+
+
+</script>
+
 <body>
+    
     <div class="navbar">
         <a href="/">主页</a>
         <a href="/about">关于</a>
@@ -22,56 +259,58 @@
         {{ end }}
 
     </div>
-    <header class="header">
-        <h1 class="title">免费视频解析下载网站</h1>
-    </header>
-    
-    <main class="main-content">
-        <div class="container">
-            <form action="/" method="post" class="form">
-                <input type="text" name="url" class="url-input" placeholder="请输入 YouTube 视频链接">
-                <button type="submit" class="submit-button">获取下载链接</button>
-            </form>
+    <div class="title">
+        <div style="cursor: pointer; user-select: none;" onclick="document.location.href = './';">Youtube&BiliBili 在线解析</div>
+    </div>
+    <div id="divURL" class="center">
+        <form name="parse" action="javascript: parse()">
+            <input class="search" id="url" name="url" type="url" autocomplete="off" placeholder="请在此粘贴要解析的视频URL后回车(支持Youtube或BiliBili, 不支持列表和时间)">
+            <div id="history"></div>
+        </form>
+    </div>
 
-            <div class="download-links">
-                <div class="video-links">
-                    <h3 class="category-title">视频下载</h3>
-                    <ul class="video-list">
-                        {{range .VideoLinks}}
-                        <li class="video-item">
-                            <span class="quality">视频质量: {{.Quality}} </span>
-                            <span class="mimetype">类型: {{.MimeType}} </span>
-                            <span class="resolution">分辨率: {{.Width}}x{{.Height}} </span>
-                            <a href="{{.URL}}" class="video-url" target="_blank">视频下载链接</a>
-                        </li>
-                        {{end}}
-                    </ul>
-                </div>
-                <div class="audio-links">
-                    <h3 class="category-title">音频下载</h3>
-                    <ul class="audio-list">
-                        {{range .AudioLinks}}
-                        <li class="video-item">
-                            <span class="quality">音频质量: {{.Quality}}</span>
-                            <span class="mimetype">类型: {{.MimeType}} </span>
-                            <a href="{{.URL}}" class="audio-url" target="_blank">音频下载链接</a>
-                        </li>
-                        {{end}}
-                    </ul>
-                </div>
-            </div>
+    <div id="divResult" class="center" style="display: none">
+        <div class="available">
+            <h1 id="title">解析结果</h1>
+            <img id="thumbnail">
         </div>
-    </main>
+
+        <div class="available">可用音频</div>
+        <table id="audios">
+            <tr>
+                <th>选中</td>
+                <th>点击链接下载</th>
+                <th>码率(kpbs)</th>
+                <th>大小(MB)</th>
+                <th style="display: none;"></th>
+                <th colspan="2">其它</th>
+            </tr>
+        </table>
+
+        <div class="available">可用视频</div>
+        <table id="videos">
+            <tr>
+                <th>选中</td>
+                <th>击链接下载</th>
+                <th>分辨率</th>
+                <th>码率(kpbs)</th>
+                <th>大小(MB)</th>
+                <th colspan="2">其它</th>
+            </tr>
+        </table>
+    </div>
+
+    <div id="wait_subtitle" style="font-family: 'MicroSoft JhengHei'; position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);">
+        <h1 id="info" style="color: mediumaquamarine;">服务器正在处理...</h1>
+    </div>
+
+    <script>
+        blacked = 0
+    </script>
+
     <div class="donation">
         <a href="/about" class="donation-text">如果觉得对你有帮助，那就赞赏我一下吧</a>
     </div>
-    <footer class="footer">
-        <p>&copy; 2024  免费视频解析下载网站</p>
-        <p class="description"> 本网站是一个个人兴趣爱好为基础的网站，基于互联网上的一些开源项目建设，比如Bootstrap、Jquery、Youtube-dl等。</p>
-        <p class="description"> 本站旨在为用户提供视频地址在线解析服务，用于用户备份及收藏个人喜爱的视频等。</p>
-        <p class="description"> 本站不储存、发布相关视频，视频版权归属其合法持有人所有，本站不对使用者的行为负担任何法律责任。</p>
-        <p class="description"> 如果有因为本站而导致您的权益受到损害，请与我们联系，我们将理性对待，协助你解决相关问题。</p>
-    </footer>
-    
 </body>
+
 </html>

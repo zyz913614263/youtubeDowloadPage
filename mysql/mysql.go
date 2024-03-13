@@ -12,6 +12,9 @@ import (
 var DefaultDB *sql.DB
 
 func InitMysql() {
+	if config.DefaultConfig.NouseMysql {
+		return
+	}
 	// 设置数据库连接信息
 	username := config.DefaultConfig.MysqlUsername
 	password := config.DefaultConfig.MysqlPassword

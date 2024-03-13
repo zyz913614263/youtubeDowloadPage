@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>友情链接</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-top: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        a:hover {
+            color: #0056b3;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NHCDVVLFE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-6NHCDVVLFE');
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/style.css?v=1">
+</head>
+<body>
+    <header class="header">
+        <div class="navbar">
+            <a href="/">主页</a>
+            {{ if .UserName }}
+            <a href="/profile">{{ .UserName }}</a>
+            <a href="/logout">登出</a>
+            {{ else }}
+            <a href="/login">登录</a>
+            <a href="/register">注册</a>
+            {{ end }}
+            <a href="/about">关于</a>
+            <a href="/contact">联系我们</a>
+            <a href="/viewport">友情链接</a>
+        </div>
+        <h1 class="title">免费视频解析下载网站(支持油管)</h1>
+    </header>
+    <ul>
+        <li><a href="http://www.yinfans.me/">4K 电影网站 - 音范丝</a></li>
+        <li><a href="http://www.pdoro.com/">4K 电影网站 - PDORO</a></li>
+        <li><a href="https://www.1080.cn/">1080P 高清电影网站</a></li>
+        <li><a href="https://www.hdchina.net">高清电影论坛 - HDChina</a></li>
+        <li><a href="https://33.agilestudio.cn/">高清电影网站 - Agile Studio</a></li>
+    </ul>
+</body>
+</html>

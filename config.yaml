@@ -9,7 +9,7 @@ mysql:
 isproxy: false
 proxy: http://127.0.0.1:33210
 cookie: cookies.txt
-online: false
+online: true
 OnlineCSR: online/freevideos.cn_bundle.crt
 OnlineKEY: online/freevideos.cn.key
 LocalCSR: cert.pem

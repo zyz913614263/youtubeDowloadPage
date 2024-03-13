@@ -1,30 +1,33 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
-	"net/url"
-	"os"
-	"strings"
-	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"github.com/kkdai/youtube/v2"
 
 	//"github.com/smartwalle/alipay/v3"
-	"golang.org/x/crypto/bcrypt"
+
+	"flag"
+
 	"zyz.com/m/config"
 	"zyz.com/m/mysql"
+	"zyz.com/m/redis"
+
+	_ "zyz.com/m/redis"
 )
 
 func main() {
 
-	config.InitConfig()
+	configFile := flag.String("config", "config.yaml", "path to configuration file")
+	// 解析命令行参数
+	flag.Parse()
+	log.Printf("%v", *configFile)
+
+	config.InitConfig(*configFile)
 	mysql.InitMysql()
 
 	r := gin.Default()
@@ -42,6 +45,9 @@ func main() {
 		return
 	}
 
+	// 添加中间件来记录请求
+	r.Use(requestCounterMiddleware())
+
 	// 将 cookie jar 设置为全局中间件
 	r.Use(func(c *gin.Context) {
 		c.Set("cookiejar", jar)
@@ -52,9 +58,24 @@ func main() {
 	r.Use(sessions.Sessions("mysession", store))
 	r.LoadHTMLGlob("templates/*")
 
+	registerRouter(r)
+
+	go func() {
+		r.Run(":80")
+	}()
+	if config.DefaultConfig.Online {
+		r.RunTLS(":443", config.DefaultConfig.OnlineCSR, config.DefaultConfig.OnlineKEY)
+	} else {
+		r.RunTLS(":443", config.DefaultConfig.LocalCSR, config.DefaultConfig.LocalKey)
+	}
+
+}
+
+func registerRouter(r *gin.Engine) {
 	// 定义路由
 	r.GET("/", IndexGet)
-	r.POST("/", handleIndex)
+	//r.POST("/", handleIndexNew)
+	r.GET("/y2b/parse", parseHandler)
 	r.Static("/static", "./static")
 
 	r.GET("/register", func(c *gin.Context) {
@@ -63,6 +84,7 @@ func main() {
 	r.GET("/login", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", nil)
 	})
+	r.GET("/pxy", ProxyHandler)
 
 	// 访问指定文件
 	r.GET("/.well-known/pki-validation/B5DCEF6CDAF508E79398C3354A6602F4.txt", func(c *gin.Context) {
@@ -93,8 +115,13 @@ func main() {
 		// 从数据库或其他存储中获取用户个人信息
 		// 这里只是一个示例，您需要根据实际情况从数据库中获取用户信息
 		userProfile := UserProfile{
-			UserName: username.(string),
-			Email:    "user@example.com", // 示例：假设用户邮箱地址
+			UserName:   username.(string),
+			Email:      "user@example.com", // 示例：假设用户邮箱地址
+			Total:      int(redis.GetCount(RequestKey)),
+			TotalParse: int(redis.GetCount(ParseKey)),
+			Day:        int(redis.GetTodayCount(RequestKey)),
+			DayParse:   int(redis.GetTodayCount(ParseKey)),
+
 			// 其他用户信息...
 		}
 
@@ -172,274 +199,4 @@ func main() {
 		// 处理支付宝支付成功后的回调
 		// 更新用户账户余额等信息
 	})
-
-	go func() {
-		r.Run(":80")
-	}()
-	if config.DefaultConfig.Online {
-		r.RunTLS(":443", config.DefaultConfig.OnlineCSR, config.DefaultConfig.OnlineKEY)
-	} else {
-		r.RunTLS(":443", config.DefaultConfig.LocalCSR, config.DefaultConfig.LocalKey)
-	}
-
-}
-
-type UserProfile struct {
-	UserName string
-	Email    string
-	// 其他用户信息字段...
-}
-
-func loginHandler(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-
-	// 查询用户是否存在
-	var hashedPassword string
-	err := mysql.DefaultDB.QueryRow("SELECT password FROM user WHERE username = ?", username).Scan(&hashedPassword)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "登录失败")
-		fmt.Println("Error querying user:", err)
-		return
-	}
-
-	// 比较密码哈希
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	if err != nil {
-		c.String(http.StatusUnauthorized, "用户名或密码错误")
-		return
-	}
-	// 将用户名保存到会话中
-	session := sessions.Default(c)
-	session.Set("username", username)
-	session.Save()
-
-	//c.String(http.StatusOK, "登录成功")
-
-	c.Redirect(http.StatusSeeOther, "/")
-}
-
-func registerHandler(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-	email := c.PostForm("email")
-
-	// 检查用户名是否已存在
-	var count int
-	err := mysql.DefaultDB.QueryRow("SELECT COUNT(*) FROM user WHERE username = ?", username).Scan(&count)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "注册失败")
-		fmt.Println("Error checking username:", err)
-		return
-	}
-	if count > 0 {
-		c.String(http.StatusBadRequest, "用户名已存在")
-		return
-	}
-
-	err = mysql.DefaultDB.QueryRow("SELECT COUNT(*) FROM user WHERE email = ?", email).Scan(&count)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "注册失败")
-		fmt.Println("Error checking username:", err)
-		return
-	}
-	if count > 0 {
-		c.String(http.StatusBadRequest, "邮箱已存在")
-		return
-	}
-	// 对密码进行加密
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "注册失败")
-		fmt.Println("Error hashing password:", err)
-		return
-	}
-
-	// 插入新用户数据
-	_, err = mysql.DefaultDB.Exec("INSERT INTO user (username, password, email) VALUES (?, ?, ?)", username, hashedPassword, email)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "注册失败")
-		fmt.Println("Error inserting user:", err)
-		return
-	}
-
-	c.Redirect(http.StatusSeeOther, "/login")
-}
-
-type Link struct {
-	Quality  string
-	URL      string
-	MimeType string
-	Width    int
-	Height   int
-}
-type IndexInfo struct {
-	VideoURL   string
-	VideoLinks []*Link
-	AudioLinks []*Link
-	UserName   string
-}
-
-func getUserName(c *gin.Context) string {
-	// 从请求上下文中获取会话对象
-	session := sessions.Default(c)
-
-	// 使用 Get 方法从会话中获取存储的值（这里是用户名）
-	usernameInterface := session.Get("username")
-
-	// 将 interface{} 类型的 username 转换为 string
-	var username string
-	if usernameInterface != nil {
-		username = usernameInterface.(string)
-	} else {
-		// 如果用户名为空，则将其设置为空字符串
-		username = ""
-	}
-
-	return username
-}
-
-func IndexGet(c *gin.Context) {
-
-	data := &IndexInfo{
-		UserName: getUserName(c),
-	}
-	c.HTML(http.StatusOK, "index.html", data)
-	return
-}
-
-func handleIndex(c *gin.Context) {
-	var w http.ResponseWriter = c.Writer
-	var r *http.Request = c.Request
-	username := getUserName(c)
-	if username == "" {
-		// 如果用户名为空，则将其设置为空字符串
-		//c.Redirect(http.StatusSeeOther, "/login")
-		//return
-	}
-
-	videoURL := r.FormValue("url")
-	if videoURL == "" || !strings.Contains(videoURL, "youtube") {
-		http.Error(w, "Invalid YouTube video URL", http.StatusBadRequest)
-		return
-	}
-	//是否选择使用代理
-	transport := &http.Transport{}
-	if config.DefaultConfig.IsProxy {
-		transport.Proxy = func(request *http.Request) (*url.URL, error) {
-			// 设置代理服务器的地址
-			proxyURL, err := url.Parse(config.DefaultConfig.Proxy)
-			if err != nil {
-				return nil, err
-			}
-			return proxyURL, nil
-		}
-	}
-
-	// 创建一个 cookie jar
-	jar, err := cookiejar.New(nil)
-	if err != nil {
-		log.Println("Error creating cookie jar:", err)
-		return
-	}
-	// 从文件中读取cookie信息
-	if err := loadCookies(jar, config.DefaultConfig.CookiesFile); err != nil {
-		log.Println("Error loading cookies:", err)
-		return
-	}
-
-	tran := &http.Client{
-		Jar:       jar,
-		Transport: transport,
-	}
-	client := youtube.Client{
-		HTTPClient: tran,
-	}
-	var video *youtube.Video
-
-	for retries := 3; retries > 0; retries-- {
-		video, err = func() (*youtube.Video, error) {
-			video, err := client.GetVideo(videoURL)
-			if err != nil {
-				return nil, err
-			}
-			return video, nil
-
-		}()
-		if err == nil {
-			break
-		}
-		log.Printf("Error getting video info: %v", err)
-		time.Sleep(1 * time.Second) // 延迟1秒后重试
-	}
-	if err != nil {
-		log.Printf("Error getting video info: %v", err)
-		http.Error(w, "Error getting video info", http.StatusInternalServerError)
-		return
-	}
-
-	var videoLinks, audioLinks []*Link
-	for _, format := range video.Formats {
-		stype := strings.Split(format.MimeType, ";")
-		if len(stype) < 2 {
-			continue
-		}
-		link := &Link{format.Quality, format.URL, stype[0], format.Width, format.Height}
-		if strings.Contains(stype[0], "audio") {
-			audioLinks = append(audioLinks, link)
-		} else {
-			videoLinks = append(videoLinks, link)
-		}
-	}
-	/*sort.Slice(videoLinks, func(i, j int) bool {
-		return videoLinks[i].MimeType > videoLinks[j].MimeType // 降序排列
-	})
-
-	sort.Slice(audioLinks, func(i, j int) bool {
-		return audioLinks[i].MimeType > audioLinks[j].MimeType // 降序排列
-	})*/
-
-	data := &IndexInfo{
-		VideoURL:   videoURL,
-		VideoLinks: videoLinks,
-		AudioLinks: audioLinks,
-		UserName:   username,
-	}
-	//log.Printf("data=%v", data)
-	c.HTML(http.StatusOK, "index.html", data)
-}
-
-func loadCookies(jar *cookiejar.Jar, filename string) error {
-	file, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.Split(line, "\t")
-		if len(parts) != 7 {
-			continue
-		}
-
-		cookie := &http.Cookie{
-			Name:   parts[5],
-			Value:  parts[6],
-			Path:   parts[2],
-			Domain: parts[0],
-		}
-		url := &url.URL{
-			Scheme: "http", // 您可以根据需要调整协议
-			Host:   parts[0],
-		}
-		jar.SetCookies(url, []*http.Cookie{cookie})
-	}
-
-	if err := scanner.Err(); err != nil {
-		return err
-	}
-
-	return nil
 }

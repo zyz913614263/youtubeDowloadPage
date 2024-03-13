@@ -43,22 +43,34 @@
             background-color: #0056b3;
         }
     </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NHCDVVLFE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-6NHCDVVLFE');
+    </script>
     <link rel="stylesheet" type="text/css" href="/static/style.css?v=1">
 </head>
 <body>
-    <div class="navbar">
-        <a href="/">主页</a>
-        <a href="/about">关于</a>
-        <a href="/contact">联系我们</a>
-        {{ if .UserName }}
-        <a href="/profile">{{ .UserName }}</a>
-        <a href="/logout">登出</a>
-        {{ else }}
-        <a href="/login">登录</a>
-        <a href="/register">注册</a>
-        {{ end }}
-
-    </div>
+    <header class="header">
+        <div class="navbar">
+            <a href="/">主页</a>
+            {{ if .UserName }}
+            <a href="/profile">{{ .UserName }}</a>
+            <a href="/logout">登出</a>
+            {{ else }}
+            <a href="/login">登录</a>
+            <a href="/register">注册</a>
+            {{ end }}
+            <a href="/about">关于</a>
+            <a href="/contact">联系我们</a>
+            <a href="/viewport">友情链接</a>
+        </div>
+        <h1 class="title">免费视频解析下载网站(支持油管)</h1>
+    </header>
 <form action="/register" method="post">
     <h2>注册</h2>
     <input type="text" id="username" name="username" placeholder="用户名" required>

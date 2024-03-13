@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"strings"
 
 	"github.com/spf13/viper"
 
@@ -23,15 +24,17 @@ type Config struct {
 	OnlineKEY   string
 	LocalCSR    string
 	LocalKey    string
+	NouseMysql  bool
 }
 
 var DefaultConfig = &Config{}
 
-func InitConfig() {
+func InitConfig(cconfigFile string) {
+	str := strings.Split(cconfigFile, ".")
 	// 初始化 Viper
-	viper.SetConfigName("config") // 设置配置文件名（不含扩展名）
-	viper.SetConfigType("yaml")   // 设置配置文件类型
-	viper.AddConfigPath(".")      // 设置配置文件路径（当前目录）
+	viper.SetConfigName(str[0]) // 设置配置文件名（不含扩展名）
+	viper.SetConfigType(str[1]) // 设置配置文件类型
+	viper.AddConfigPath(".")    // 设置配置文件路径（当前目录）
 
 	// 读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
@@ -52,6 +55,7 @@ func InitConfig() {
 	DefaultConfig.OnlineKEY = viper.GetString("OnlineKEY")
 	DefaultConfig.LocalCSR = viper.GetString("LocalCSR")
 	DefaultConfig.LocalKey = viper.GetString("LocalKey")
+	DefaultConfig.NouseMysql = viper.GetBool("NouseMysql")
 
 	log.Printf("config load %v", DefaultConfig)
 }
