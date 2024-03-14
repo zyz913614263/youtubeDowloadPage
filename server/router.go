@@ -1,10 +1,12 @@
 package server
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"zyz.com/m/mysql"
 	"zyz.com/m/redis"
 )
 
@@ -78,62 +80,49 @@ func RegisterRouter(r *gin.Engine) {
 		}
 		c.HTML(http.StatusOK, "about.html", data)
 	})
-
-	// 设置支付宝客户端
-	/*aliPayClient, err := alipay.New(alipay.Config{
-		AppId:        "your-app-id",
-		NotifyUrl:    "your-notify-url",
-		PrivateKey:   "your-private-key",
-		AliPublicKey: "alipay-public-key",
-		SignType:     "RSA2",
+	r.GET("/messages", func(c *gin.Context) {
+		data := &IndexInfo{
+			UserName: getUserName(c),
+		}
+		c.HTML(http.StatusOK, "message.html", data)
 	})
-	if err != nil {
-		panic(err)
-	}*/
-
-	// 处理充值请求
-	r.POST("/recharge", func(c *gin.Context) {
-		// 获取用户提交的充值方式
-		/*subscription := c.PostForm("subscription")
-		if subscription == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "请选择充值方式"})
-			return
-		}
-
-		// 设置订单金额和标题
-		var amount float64
-		var subject string
-		switch subscription {
-		case "monthly":
-			amount = 19.9
-			subject = "月卡充值"
-		case "yearly":
-			amount = 199.9
-			subject = "年卡充值"
-		default:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "请选择有效的充值方式"})
-			return
-		}
-
-		// 发起支付请求
-		param := &alipay.TradePagePay{}
-		param.Subject = subject
-		param.TotalAmount = fmt.Sprintf("%.2f", amount)
-		param.OutTradeNo = "your-out-trade-no"
-		param.ProductCode = "FAST_INSTANT_TRADE_PAY"
-		url, err := aliPayClient.TradePagePay(param)
+	r.GET("/messages-list", func(c *gin.Context) {
+		var messages []Messages
+		rows, err := mysql.DefaultDB.Query("SELECT name, message,created_at  FROM messages order by id desc limit 50")
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "支付请求失败"})
+			log.Println(err)
+			c.String(http.StatusInternalServerError, "Failed to retrieve messages")
+			return
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var m Messages
+			if err := rows.Scan(&m.Name, &m.Message, &m.Time); err != nil {
+				log.Println(err)
+				continue
+			}
+			messages = append(messages, m)
+		}
+
+		c.JSON(http.StatusOK, messages)
+	})
+
+	r.POST("/messages", func(c *gin.Context) {
+		var m Messages
+		if err := c.Bind(&m); err != nil {
+			c.String(http.StatusBadRequest, "Invalid request body")
 			return
 		}
 
-		// 将用户重定向至支付宝支付页面
-		c.Redirect(http.StatusFound, url.String())*/
+		_, err := mysql.DefaultDB.Exec("INSERT INTO messages (name, message) VALUES (?, ?)", m.Name, m.Message)
+		if err != nil {
+			log.Println(err)
+			c.String(http.StatusInternalServerError, "Failed to insert message")
+			return
+		}
+
+		c.Redirect(http.StatusFound, "/messages")
 	})
 
-	// 处理支付回调
-	r.POST("/callback", func(c *gin.Context) {
-		// 处理支付宝支付成功后的回调
-		// 更新用户账户余额等信息
-	})
 }

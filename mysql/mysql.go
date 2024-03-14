@@ -51,6 +51,11 @@ func InitMysql() {
 	if err = checkUserTableExists(DefaultDB); err != nil {
 		panic(err.Error())
 	}
+
+	// 检查是否存在 message 表
+	if err = checkMessageTableExists(DefaultDB); err != nil {
+		panic(err.Error())
+	}
 }
 
 // checkUserTableExists 检查是否存在 user 表，如果不存在则创建
@@ -82,6 +87,35 @@ func checkUserTableExists(db *sql.DB) error {
 		log.Println("User table created successfully")
 	} else {
 		log.Println("User table already exists")
+	}
+	return nil
+}
+
+func checkMessageTableExists(db *sql.DB) error {
+	// 查询数据库中是否存在 messages 表
+	query := `SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'messages'`
+	var count int
+	err := db.QueryRow(query).Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	// 如果 messages 表不存在，则创建表
+	if count == 0 {
+		createTableQuery := `
+			CREATE TABLE messages (
+				id INT AUTO_INCREMENT PRIMARY KEY,
+				name VARCHAR(255) NOT NULL,
+				message TEXT NOT NULL,
+    			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			)
+		`
+		if _, err := db.Exec(createTableQuery); err != nil {
+			return err
+		}
+		log.Println("message table created successfully")
+	} else {
+		log.Println("message table already exists")
 	}
 	return nil
 }

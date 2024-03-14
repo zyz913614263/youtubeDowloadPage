@@ -91,3 +91,9 @@ type Available struct {
 	Audios []Audio `json:"audios"`
 	Videos []Video `json:"videos"`
 }
+
+type Messages struct {
+	Name    string `json:"name" form:"name" binding:"required"`
+	Message string `json:"message" form:"message" binding:"required"`
+	Time    string `json:"time"`
+}

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言板</title>
+    <style>
+        .message {
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+            width: 800px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        #container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: none;
+            font-size: 16px;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        h1 {
+            text-align: center;
+        }
+
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/style.css?v=1">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">主页</a>
+        <a href="/messages">留言板</a>
+        <a href="/about">关于</a>
+        <a href="/contact">联系我们</a>
+        {{ if .UserName }}
+        <a href="/profile">{{ .UserName }}</a>
+        <a href="/logout">登出</a>
+        {{ else }}
+        <a href="/login">登录</a>
+        <a href="/register">注册</a>
+        {{ end }}
+
+    </div>
+    <h1>留言板</h1>
+
+    <!-- 留言表单 -->
+    <div id="container">
+        <form action="/messages" method="post">
+            <label for="name">姓名：</label>
+            <input type="text" id="name" name="name" required><br>
+            <label for="message">留言内容：</label><br>
+            <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
+            <button type="submit">提交留言</button>
+        </form>
+          <!-- 历史留言 -->
+        <h2>历史留言</h2>
+        <div id="messages">
+            <!-- 这里会通过 JavaScript 动态添加历史留言 -->
+        </div>
+
+    </div>
+
+  
+    <script>
+        // 页面加载完成后请求获取历史留言
+        window.onload = function() {
+            fetch('/messages-list')
+                .then(response => response.json())
+                .then(data => {
+                    const messagesDiv = document.getElementById('messages');
+                    data.forEach(message => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.classList.add('message');
+                        messageDiv.innerHTML = `<strong>${message.name}</strong>: ${message.message} :${message.time}`;
+                        messagesDiv.appendChild(messageDiv);
+                    });
+                })
+                .catch(error => console.error('Error fetching messages:', error));
+        };
+    </script>
+</body>
+</html>
