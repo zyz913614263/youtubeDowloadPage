@@ -1,6 +1,6 @@
 # YouTube视频下载网站
 
-  [FreeVideos.cn](https://www.freevideos.cn/) 是一个免费的YouTube视频下载网站。
+  
   
   该项目使用Go语言和原生HTML进行开发。
 
