@@ -1,17 +1,8 @@
 # YouTube视频下载网站
-  该项目使用Go语言和原生HTML进行开发。   
-  
-  [go.dev](https://go.dev/) 1.21.7 版本   
-  
+  该项目使用Go语言和原生HTML进行开发。[go.dev](https://go.dev/) 1.21.7 版本   
 
-
-  
-  使用yt-dlp开源工具下载youtube视频   
-  
+  使用yt-dlp开源工具下载youtube视频
   [yt-dlp ](https://github.com/yt-dlp/yt-dlp/releases/tag/2025.02.19)   
-  
-
-
   
   自己实现了下载资源界面   
   
@@ -20,13 +11,22 @@
 
 
 ## go代码，使用下面的命令编译
-
+   windows下编译
+  ```bash
+  go build -o goweb.exe
+  ```
+  windows下编译linux版本
   ```bash
   GOOS=linux go build -o goweb
   ```
+
 ## 网站启动方式
   配置文件 config.yaml 包含了与数据库相关的配置信息，可自行修改。
-  
+  windows 下运行
+  ```bash
+  ./goweb.exe
+  ```
+  linux下运行
   ```bash
   # 将整个文件夹拷贝到Linux服务器上
   cd youtubeDowloadPage
@@ -36,7 +36,7 @@
 
 
 
-## 下载自己专用的cookie 文件
+## 下载自己专用的cookie 文件(不更新的话基本不能使用)
 要将 YouTube 的 Cookie 导出到文件以便与 `yt-dlp` 一起使用，您可以按照以下步骤操作。请注意，导出 Cookie 的目的是为了访问需要登录的内容（如私人播放列表、年龄限制视频或会员专属内容），但请谨慎使用，以避免账户被封禁。
 
 ---
