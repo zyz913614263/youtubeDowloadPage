@@ -3,7 +3,6 @@ package redis
 import (
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"time"
 
@@ -25,11 +24,14 @@ func InitRedis() {
 	_, err := Client.Ping(Client.Context()).Result()
 	if err != nil {
 		fmt.Println("Error connecting to Redis:", err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 }
 
 func AddCount(key string) {
+	if Client == nil {
+		return
+	}
 	// 每次访问计数器加一
 	err := Client.Incr(Client.Context(), key).Err()
 	if err != nil {
@@ -39,6 +41,9 @@ func AddCount(key string) {
 	AddToday(key)
 }
 func GetCount(key string) int {
+	if Client == nil {
+		return 0
+	}
 	// 输出当前的访问量
 	visits, err := Client.Get(Client.Context(), key).Result()
 	if err != nil {
@@ -58,6 +63,9 @@ func getToday() string {
 }
 
 func AddToday(key string) {
+	if Client == nil {
+		return
+	}
 	key = getToday() + key
 	err := Client.Incr(Client.Context(), key).Err()
 	if err != nil {
@@ -67,6 +75,9 @@ func AddToday(key string) {
 }
 
 func GetTodayCount(key string) int {
+	if Client == nil {
+		return 0
+	}
 	key = getToday() + key
 	// 输出当前的访问量
 	visits, err := Client.Get(Client.Context(), key).Result()

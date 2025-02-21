@@ -16,3 +16,4 @@ LocalKey: private-key.pem
 RedisAddr: localhost:6379
 RedisPass: ""
 RedisDB: 0
+NouseMysql: true
