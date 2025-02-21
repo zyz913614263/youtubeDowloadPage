@@ -1,7 +1,11 @@
 # YouTube视频下载网站
   该项目使用Go语言和原生HTML进行开发。
   [go.dev](https://go.dev/) 1.21.7 版本
+  使用yt-dlp开源工具下载youtube视频
   [yt-dlp ](https://github.com/yt-dlp/yt-dlp/releases/tag/2025.02.19)
+  自己实现了下载资源界面
+  ![Uploading image.png…]()
+
 
 ## go代码，使用下面的命令编译
 
