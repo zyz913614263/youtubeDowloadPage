@@ -1,14 +1,15 @@
 # config.yaml
+# config.yaml
 MysqlUsername: root
 MysqlPassword: 123456
 MysqlHost: 127.0.0.1
 MysqlPort: 3306
 MysqlDBName: web
 
-IsProxy: false
+IsProxy: true
 Proxy: http://127.0.0.1:33210
 CookiesFile: cookies.txt
-Online: true
+Online: false
 OnlineCSR: online/freevideos.cn_bundle.crt
 OnlineKEY: online/freevideos.cn.key
 LocalCSR: cert.pem

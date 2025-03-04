@@ -13,7 +13,9 @@ import (
 var Client *redis.Client
 
 func InitRedis() {
-
+	if !config.DefaultConfig.Online {
+		return
+	}
 	Client = redis.NewClient(&redis.Options{
 		Addr:     config.DefaultConfig.RedisAddr,
 		Password: config.DefaultConfig.RedisPass, // 密码，如果有的话

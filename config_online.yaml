@@ -1,0 +1,19 @@
+# config.yaml
+MysqlUsername: root
+MysqlPassword: 123456
+MysqlHost: 127.0.0.1
+MysqlPort: 3306
+MysqlDBName: web
+
+IsProxy: false
+Proxy: http://127.0.0.1:33210
+CookiesFile: cookies.txt
+Online: true
+#OnlineCSR: online/freevideos.cn_bundle.crt
+#OnlineKEY: online/freevideos.cn.key
+LocalCSR: cert.pem
+LocalKey: private-key.pem
+RedisAddr: localhost:6379
+RedisPass: ""
+RedisDB: 0
+NouseMysql: true
